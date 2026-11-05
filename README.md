@@ -6,6 +6,29 @@ Run the tests with `python3 -m unittest discover -s tests -v`.
 
 ## Shipping
 
-`shipping_quote(weight_kg, zone)` returns a standard delivery quote. Zones are
-`local` and `regional`; weights must be positive. The command-line entry point
-prints a quote for an order.
+`warehouse.rates.shipping_quote(weight_kg, zone, service="standard")` returns a
+shipping quote in dollars, rounded to two decimal places. Zones are `local` and
+`regional`; weights must be positive. Standard shipping costs $5 (local) or $8
+(regional), plus $1.50 per kilogram. Express adds $7 in either zone. Omitting
+`service` preserves the standard quote. Invalid weights, zones, or services raise
+`ValueError`; service names must be `standard` or `express`.
+
+```python
+from warehouse.rates import shipping_quote
+
+shipping_quote(2, "local")                     # 8.0 (standard)
+shipping_quote(2, "local", service="express")  # 15.0
+shipping_quote(2, "regional", "express")       # 18.0
+```
+
+The command-line entry point prints a quote for an order. `--service` defaults
+to `standard` and accepts `standard` or `express`; other values are rejected.
+
+```console
+$ python3 -m warehouse.cli 2 local
+$8.00
+$ python3 -m warehouse.cli 2 local --service standard
+$8.00
+$ python3 -m warehouse.cli 2 regional --service express
+$18.00
+```
